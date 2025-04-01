@@ -1,0 +1,77 @@
+{
+  "platforms": [
+    {
+      "name": "TikTok",
+      "post_text": "When your cat has expensive taste \ud83d\ude39 #GroceryStoreMayhem #CatTok #PetComedy",
+      "hashtags": [
+        "catsoftiktok",
+        "funnypets",
+        "catadventures",
+        "whiskerswednesday",
+        "shoppingspree"
+      ],
+      "best_time_to_post": "18:00",
+      "engagement_prompt": "What's the craziest thing your cat has ever done? Tell us in the comments! \ud83d\udc47"
+    },
+    {
+      "name": "Instagram",
+      "post_text": "Whiskers has entered the chat... and the food.! \ud83d\uded2\ud83d\udc31 Watch the full adventure of our Mischievous Cat Shopper! #CatsOfInstagram",
+      "hashtags": [
+        "catsofinstagram",
+        "petinfluencer",
+        "catcomedy",
+        "funnycats",
+        "catshopping"
+      ],
+      "best_time_to_post": "12:00",
+      "engagement_prompt": "Double tap if your cat would totally do this too! What would YOUR cat shop for? \ud83d\udcad"
+    },
+    {
+      "name": "YouTube Shorts",
+      "post_text": "Grocery Store Mayhem | Mischievous Cat Shopper Series",
+      "hashtags": [
+        "CatVideos",
+        "PetComedy",
+        "ShortFilm",
+        "AnimalsBeingDerps",
+        "CatShopping"
+      ],
+      "best_time_to_post": "15:00",
+      "engagement_prompt": "Subscribe to see more of Whiskers' shopping adventures! New episode every Friday!"
+    },
+    {
+      "name": "Twitter",
+      "post_text": "POV: You're a store manager and this little guy just set off your 'no pets allowed' alarm. \ud83d\udc31\ud83d\uded2 #GroceryStoreMayhem",
+      "hashtags": [
+        "CatsOfTwitter",
+        "FunnyPets",
+        "CatTales",
+        "PetComedy"
+      ],
+      "best_time_to_post": "17:00",
+      "engagement_prompt": "Reply with what you think Whiskers is shopping for! Wrong answers only. \ud83d\ude39"
+    }
+  ],
+  "content_variations": [
+    {
+      "type": "Behind-the-scenes",
+      "description": "How we trained our cat actor to perform shopping scenes",
+      "purpose": "Show the work that goes into creating the content and build connection with audience"
+    },
+    {
+      "type": "Teaser",
+      "description": "5-second clip of Whiskers in action with dramatic music",
+      "purpose": "Build anticipation for the full episode"
+    },
+    {
+      "type": "Character spotlight",
+      "description": "Meet Whiskers: his likes, dislikes, and shopping preferences",
+      "purpose": "Develop character connection and backstory"
+    },
+    {
+      "type": "Blooper reel",
+      "description": "Funny outtakes from filming the shopping scene",
+      "purpose": "Provide additional entertainment value and show authenticity"
+    }
+  ]
+}

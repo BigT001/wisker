@@ -1,0 +1,46 @@
+{
+  "scenes": [
+    {
+      "description": "Busy supermarket on a Saturday morning with appropriate signage visible.",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Busy supermarket on a Saturday morning with appropriate signage visible., mischievous expression, detailed environment, bright lighting",
+      "style": "Detailed, colorful, slight anthropomorphism",
+      "shot_type": "Medium wide shot"
+    },
+    {
+      "description": "Whiskers sneakily enters the busy supermarket on a saturday morning.",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Whiskers sneakily enters the busy supermarket on a saturday morning., mischievous expression, detailed environment, bright lighting",
+      "style": "Detailed, colorful, slight anthropomorphism",
+      "shot_type": "Medium wide shot"
+    },
+    {
+      "description": "Whiskers explores the store, examining various items with a discerning eye.",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Whiskers explores the store, examining various items with a discerning eye., mischievous expression, detailed environment, bright lighting",
+      "style": "Detailed, colorful, slight anthropomorphism",
+      "shot_type": "Medium wide shot"
+    },
+    {
+      "description": "Store manager notices a cat in the store and tries to catch Whiskers",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Store manager notices a cat in the store and tries to catch Whiskers, mischievous expression, detailed environment, bright lighting",
+      "style": "Dynamic, action-oriented, bright lighting",
+      "shot_type": "Wide action shot with motion"
+    },
+    {
+      "description": "Montage of Whiskers navigating the conflict, causing minor chaos.",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Montage of Whiskers navigating the conflict, causing minor chaos., mischievous expression, detailed environment, bright lighting",
+      "style": "Dynamic, action-oriented, bright lighting",
+      "shot_type": "Wide action shot with motion"
+    },
+    {
+      "description": "Whiskers charms an elderly shopper who helps him escape with his treats",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Whiskers charms an elderly shopper who helps him escape with his treats, mischievous expression, detailed environment, bright lighting",
+      "style": "Triumphant, warm, satisfying composition",
+      "shot_type": "Medium shot focusing on cat's expression"
+    },
+    {
+      "description": "Whiskers with the items he wanted, looking satisfied.",
+      "stable_diffusion_prompt": "Photorealistic orange tabby cat in Whiskers with the items he wanted, looking satisfied., mischievous expression, detailed environment, bright lighting",
+      "style": "Triumphant, warm, satisfying composition",
+      "shot_type": "Medium shot focusing on cat's expression"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+[Simulated image for scene 1]
+
+Prompt: Photorealistic orange tabby cat in Busy supermarket on a Saturday morning with appropriate signage visible., mischievous expression, detailed environment, bright lighting
+Style: Detailed, colorful, slight anthropomorphism
+Shot Type: Medium wide shot
