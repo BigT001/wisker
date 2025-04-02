@@ -21,7 +21,6 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
-
 // Script generation
 export async function generateScript(episodeIndex: number) {
   return fetchAPI(`/generate/script/${episodeIndex}`, {
@@ -69,55 +68,103 @@ export async function getJobStatus(jobId: string) {
   return fetchAPI(`/jobs/${jobId}`);
 }
 
-
-
-
-/**
- * API functions for content generation
- * These are mock implementations for demonstration purposes
- */
-
 interface ContentPlanConfig {
-  num_episodes: number
-  theme: string
+  num_episodes: number;
+  theme: string;
+  title?: string;
+  description?: string;
 }
 
 /**
  * Generates a content plan based on the provided configuration
  */
-export async function generateContentPlan(config: ContentPlanConfig): Promise<void> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 2000))
-
-  // In a real implementation, this would make an API call to a backend service
-  console.log("Generating content plan with config:", config)
-
-  // Return success (in a real app, this would return the generated plan)
-  return Promise.resolve()
+export async function generateContentPlan(config: ContentPlanConfig) {
+  return fetchAPI('/generate/content-plan', {
+    method: 'POST',
+    body: JSON.stringify(config),
+  });
 }
 
 /**
  * Runs the full content generation pipeline for a specific episode
  */
-export async function runFullPipeline(episodeId: number): Promise<void> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1500))
-
-  // In a real implementation, this would trigger a backend pipeline
-  console.log("Running full pipeline for episode:", episodeId)
-
-  // Return success
-  return Promise.resolve()
+export async function runFullPipeline(episodeId: number) {
+  return fetchAPI(`/generate/pipeline/${episodeId}`, {
+    method: 'POST',
+  });
 }
 
 /**
  * Checks the status of the API connection
  */
 export async function checkApiStatus(): Promise<boolean> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // In a real implementation, this would check if the API is available
-  return Promise.resolve(true)
+  try {
+    const response = await fetchAPI('/status', {
+      method: 'GET',
+      // Add a timeout to prevent hanging requests
+      signal: AbortSignal.timeout(5000),
+    });
+    
+    return response.status === 'operational';
+  } catch (error) {
+    console.error('API status check failed:', error);
+    return false;
+  }
 }
 
+/**
+ * Get all episodes
+ */
+export async function getEpisodes() {
+  return fetchAPI('/episodes');
+}
+
+/**
+ * Get a specific episode by ID
+ */
+export async function getEpisode(episodeId: number) {
+  return fetchAPI(`/episodes/${episodeId}`);
+}
+
+/**
+ * Get all content plans
+ */
+export async function getContentPlans() {
+  return fetchAPI('/content-plans');
+}
+
+/**
+ * Get a specific content plan by ID
+ */
+export async function getContentPlan(planId: string) {
+  return fetchAPI(`/content-plans/${planId}`);
+}
+
+/**
+ * Save a content plan
+ */
+export async function saveContentPlan(plan: any) {
+  return fetchAPI('/content-plans', {
+    method: 'POST',
+    body: JSON.stringify(plan),
+  });
+}
+
+/**
+ * Update a content plan
+ */
+export async function updateContentPlan(planId: string, plan: any) {
+  return fetchAPI(`/content-plans/${planId}`, {
+    method: 'PUT',
+    body: JSON.stringify(plan),
+  });
+}
+
+/**
+ * Delete a content plan
+ */
+export async function deleteContentPlan(planId: string) {
+  return fetchAPI(`/content-plans/${planId}`, {
+    method: 'DELETE',
+  });
+}

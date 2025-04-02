@@ -42,6 +42,10 @@ app.include_router(files.router)
 async def root():
     return {"message": "Welcome to the Mischievous Cat Shopper API"}
 
+@app.get("/status")
+async def status():
+    return {"status": "operational"}
+
 # Create __init__.py files in necessary directories
 def create_init_files():
     # Create __init__.py in routes directory
