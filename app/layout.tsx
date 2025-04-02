@@ -1,8 +1,12 @@
-import type React from "react"
 import type { Metadata } from "next";
-import "@/app/globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
+import { Inter, Playfair_Display } from 'next/font/google'
+import "./globals.css";
+
+const inter = Inter({ subsets: ['latin'] })
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  variable: '--font-playfair'
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -11,25 +15,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>Mischievous Cat Shopper</title>
-        <meta
-          name="description"
-          content="AI-powered content generation platform for the Mischievous Cat Shopper series"
-        />
-      </head>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    <html lang="en">
+    <body className={`${inter.className} ${playfair.variable}`}>{children}</body>
+  </html>
+  );
 }
-

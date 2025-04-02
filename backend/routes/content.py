@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 
-from api.models.schemas import ContentConfig, ContentPlan
+from models.schemas import ContentConfig, ContentPlan
 from agents.content_agent import generate_content_ideas, generate_simulated_content_ideas
 
 router = APIRouter(prefix="/generate", tags=["content"])

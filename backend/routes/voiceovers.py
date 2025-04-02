@@ -2,7 +2,7 @@ import os
 import asyncio
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
-from api.utils.helpers import jobs, update_job_progress, extract_narration_lines
+from utils.helpers import jobs, update_job_progress, extract_narration_lines
 from agents.voiceover_agent import generate_voiceovers, generate_simulated_voiceovers
 
 router = APIRouter(prefix="/generate", tags=["voiceovers"])
@@ -63,3 +63,9 @@ async def process_voiceovers(job_id: str, script: str, episode_index: int):
 
         # Update job status
         jobs[job_id]["status"] = "completed"
+        jobs[job_id]["progress"] = 100
+        jobs[job_id]["result_path"] = f"./outputs/audio/episode{episode_index+1}/"
+    except Exception as e:
+        jobs[job_id]["status"] = "failed"
+        jobs[job_id]["error"] = str(e)
+        print(f"Error generating voiceovers: {e}")

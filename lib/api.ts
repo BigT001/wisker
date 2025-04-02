@@ -21,13 +21,6 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
-// Content generation
-export async function generateContentPlan(config: any) {
-  return fetchAPI('/generate/content-plan', {
-    method: 'POST',
-    body: JSON.stringify(config),
-  });
-}
 
 // Script generation
 export async function generateScript(episodeIndex: number) {
@@ -76,9 +69,55 @@ export async function getJobStatus(jobId: string) {
   return fetchAPI(`/jobs/${jobId}`);
 }
 
-// Full pipeline
-export async function runFullPipeline(episodeIndex: number) {
-  return fetchAPI(`/generate/full-pipeline/${episodeIndex}`, {
-    method: 'POST',
-  });
+
+
+
+/**
+ * API functions for content generation
+ * These are mock implementations for demonstration purposes
+ */
+
+interface ContentPlanConfig {
+  num_episodes: number
+  theme: string
 }
+
+/**
+ * Generates a content plan based on the provided configuration
+ */
+export async function generateContentPlan(config: ContentPlanConfig): Promise<void> {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+
+  // In a real implementation, this would make an API call to a backend service
+  console.log("Generating content plan with config:", config)
+
+  // Return success (in a real app, this would return the generated plan)
+  return Promise.resolve()
+}
+
+/**
+ * Runs the full content generation pipeline for a specific episode
+ */
+export async function runFullPipeline(episodeId: number): Promise<void> {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  // In a real implementation, this would trigger a backend pipeline
+  console.log("Running full pipeline for episode:", episodeId)
+
+  // Return success
+  return Promise.resolve()
+}
+
+/**
+ * Checks the status of the API connection
+ */
+export async function checkApiStatus(): Promise<boolean> {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  // In a real implementation, this would check if the API is available
+  return Promise.resolve(true)
+}
+

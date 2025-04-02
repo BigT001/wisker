@@ -1,0 +1,4 @@
+[Simulated video for episode 1]
+
+This is a placeholder for the actual video file.
+In a production environment, this would be an MP4 file created by combining the images and audio.

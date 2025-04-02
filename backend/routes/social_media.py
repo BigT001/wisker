@@ -2,7 +2,7 @@ import os
 import json
 from fastapi import APIRouter, HTTPException
 
-from api.models.schemas import SocialMediaPlan
+from models.schemas import SocialMediaPlan
 from agents.social_media_agent import generate_social_media_plan, generate_simulated_social_media_plan
 
 router = APIRouter(prefix="/generate", tags=["social-media"])

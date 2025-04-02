@@ -42,17 +42,16 @@ app.include_router(files.router)
 async def root():
     return {"message": "Welcome to the Mischievous Cat Shopper API"}
 
-# Create __init__.py files in necessary directories
+# Create an __init__.py file in the routes directory
 def create_init_files():
-    # Create __init__.py in routes directory
-    os.makedirs("routes", exist_ok=True)
-    with open("routes/__init__.py", "w") as f:
+    os.makedirs("api/routes", exist_ok=True)
+    with open("api/routes/__init__.py", "w") as f:
         f.write("# Routes package\n")
 
 if __name__ == "__main__":
     # Create necessary init files
     create_init_files()
-   
+    
     # Use port 8000 for local development
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=port, reload=True)
