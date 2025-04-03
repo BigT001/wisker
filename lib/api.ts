@@ -25,69 +25,106 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     return data;
   } catch (error) {
     console.error(`Error in API request to ${endpoint}:`, error);
-    throw error instanceof Error 
-      ? error 
+    throw error instanceof Error
+      ? error
       : new Error('An unknown error occurred while fetching the data.');
   }
 }
 
+// Get API key based on provider
+function getApiKey(apiProvider: string = 'openai', providedKey?: string): string | undefined {
+  const storageKey = apiProvider === 'openai' ? 'openai_api_key' : 'huggingface_api_key';
+  return providedKey || localStorage.getItem(storageKey) || undefined;
+}
+
+// Save API key based on provider
+function saveApiKey(apiKey: string, apiProvider: string = 'openai'): void {
+  const storageKey = apiProvider === 'openai' ? 'openai_api_key' : 'huggingface_api_key';
+  localStorage.setItem(storageKey, apiKey);
+  localStorage.setItem('api_provider', apiProvider);
+}
+
 // Script generation
-export async function generateScript(episodeIndex: number, apiKey?: string) {
+export async function generateScript(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/content/generate-script`, {
     method: 'POST',
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       episode_index: episodeIndex,
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
 
 // Visual prompts generation
-export async function generateVisualPrompts(episodeIndex: number, apiKey?: string) {
+export async function generateVisualPrompts(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/visual-prompts/${episodeIndex}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
 
 // Image generation
-export async function generateImages(episodeIndex: number, apiKey?: string) {
+export async function generateImages(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/images/${episodeIndex}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
 
 // Voiceover generation
-export async function generateVoiceovers(episodeIndex: number, apiKey?: string) {
+export async function generateVoiceovers(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/voiceovers/${episodeIndex}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
 
 // Video generation
-export async function generateVideo(episodeIndex: number, apiKey?: string) {
+export async function generateVideo(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/video/${episodeIndex}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
 
 // Social media plan generation
-export async function generateSocialMediaPlan(episodeIndex: number, apiKey?: string) {
+export async function generateSocialMediaPlan(episodeIndex: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/social-media/${episodeIndex}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }
@@ -108,30 +145,35 @@ interface ContentPlanConfig {
   additional_characters?: string;
   description?: string;
   api_key?: string;
+  api_provider?: 'openai' | 'huggingface';
+  use_gpt4?: boolean;
 }
 
 /**
  * Generates a content plan based on the provided configuration
  */
 export async function generateContentPlan(config: ContentPlanConfig) {
+  // Use the provided API provider or get from localStorage
+  const apiProvider = config.api_provider || localStorage.getItem('api_provider') || 'openai';
+  const apiKey = getApiKey(apiProvider, config.api_key);
+  
   console.log("Sending content plan request with config:", {
     ...config,
-    api_key: config.api_key ? "[REDACTED]" : undefined
+    api_key: apiKey ? "[REDACTED]" : undefined,
+    api_provider: apiProvider
   });
-  
-  // Use the provided API key or get from localStorage
-  const apiKey = config.api_key || localStorage.getItem('openai_api_key') || undefined;
   
   // If a new API key is provided, save it for future use
   if (config.api_key) {
-    localStorage.setItem('openai_api_key', config.api_key);
+    saveApiKey(config.api_key, apiProvider);
   }
   
   return fetchAPI('/content/generate-plan', {
     method: 'POST',
     body: JSON.stringify({
       ...config,
-      api_key: apiKey
+      api_key: apiKey,
+      api_provider: apiProvider
     }),
   });
 }
@@ -139,11 +181,15 @@ export async function generateContentPlan(config: ContentPlanConfig) {
 /**
  * Runs the full content generation pipeline for a specific episode
  */
-export async function runFullPipeline(episodeId: number, apiKey?: string) {
+export async function runFullPipeline(episodeId: number, apiKey?: string, apiProvider?: string) {
+  const provider = apiProvider || localStorage.getItem('api_provider') || 'openai';
+  const key = getApiKey(provider, apiKey);
+  
   return fetchAPI(`/generate/full-pipeline/${episodeId}`, {
     method: 'POST',
     body: JSON.stringify({
-      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+      api_key: key,
+      api_provider: provider
     }),
   });
 }

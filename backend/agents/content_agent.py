@@ -1,16 +1,27 @@
 import os
 import json
 import aiohttp
-from typing import Dict, Any, List
+from typing import Dict, Any, Optional
+import openai
+from .huggingface_agent import generate_content_ideas_hf
 
 async def generate_content_ideas(config: Dict[str, Any]) -> Dict[str, Any]:
-    """Generate content ideas for a cat shopping series"""
-    try:
-        # Get API key from config or environment
-        api_key = config.get('api_key') or os.environ.get('OPENAI_API_KEY')
+    """Generate content ideas using either OpenAI or Hugging Face"""
+    
+    # Determine which API to use
+    api_provider = config.get("api_provider", "openai")
+    
+    if api_provider == "huggingface":
+        return await generate_content_ideas_hf(config)
+    else:
+        # Original OpenAI implementation
+        api_key = config.get("api_key") or os.environ.get("OPENAI_API_KEY")
         
         if not api_key:
-            raise ValueError("OpenAI API key is required but not provided")
+            raise ValueError("OpenAI API key is required")
+        
+        # Set the API key for this request
+        openai.api_key = api_key
         
         # Extract configuration
         series_title = config.get('series_title', 'Mischievous Cat Shopper')
@@ -25,7 +36,7 @@ async def generate_content_ideas(config: Dict[str, Any]) -> Dict[str, Any]:
         print(f"Generating content ideas for '{series_title}' with {num_episodes} episodes")
         
         # Prepare the prompt for OpenAI
-        system_prompt = """You are a creative content planner for short-form video series. 
+        system_prompt = """You are a creative content planner for short-form video series.
         Create a detailed content plan for a series about a mischievous cat who goes shopping."""
         
         user_prompt = f"""Create a content plan for a short-form video series titled "{series_title}" with {num_episodes} episodes.
@@ -92,54 +103,55 @@ async def generate_content_ideas(config: Dict[str, Any]) -> Dict[str, Any]:
         
         print("Sending request to OpenAI API")
         
-        # Make the API request
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=payload
-            ) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    print(f"OpenAI API error: {response.status} - {error_text}")
-                    raise ValueError(f"OpenAI API returned error {response.status}: {error_text}")
-                
-                result = await response.json()
-        
-        print("Received response from OpenAI API")
-        
-        # Extract and parse the content plan
-        content_plan_text = result["choices"][0]["message"]["content"]
-        
-        # Sometimes OpenAI returns text before or after the JSON, so we need to extract just the JSON part
         try:
-            # Try to parse the entire response as JSON
-            content_plan = json.loads(content_plan_text)
-            print("Successfully parsed JSON response")
-        except json.JSONDecodeError:
-            # If that fails, try to extract just the JSON part
-            import re
-            print("Failed to parse entire response as JSON, trying to extract JSON part")
-            json_match = re.search(r'({[\s\S]*})', content_plan_text)
-            if json_match:
-                try:
-                    content_plan = json.loads(json_match.group(1))
-                    print("Successfully extracted and parsed JSON part")
-                except json.JSONDecodeError:
-                    print("Failed to parse extracted JSON part")
-                    raise ValueError("Failed to parse OpenAI response as JSON")
-            else:
-                print("Failed to extract JSON part from response")
-                raise ValueError("Failed to extract JSON from OpenAI response")
+            # Make the API request
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers=headers,
+                    json=payload
+                ) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        print(f"OpenAI API error: {response.status} - {error_text}")
+                        raise ValueError(f"OpenAI API returned error {response.status}: {error_text}")
+                    
+                    result = await response.json()
+            
+            print("Received response from OpenAI API")
+            
+            # Extract and parse the content plan
+            content_plan_text = result["choices"][0]["message"]["content"]
+            
+            # Sometimes OpenAI returns text before or after the JSON, so we need to extract just the JSON part
+            try:
+                # Try to parse the entire response as JSON
+                content_plan = json.loads(content_plan_text)
+                print("Successfully parsed JSON response")
+            except json.JSONDecodeError:
+                # If that fails, try to extract just the JSON part
+                import re
+                print("Failed to parse entire response as JSON, trying to extract JSON part")
+                json_match = re.search(r'({[\s\S]*})', content_plan_text)
+                if json_match:
+                    try:
+                        content_plan = json.loads(json_match.group(1))
+                        print("Successfully extracted and parsed JSON part")
+                    except json.JSONDecodeError:
+                        print("Failed to parse extracted JSON part")
+                        raise ValueError("Failed to parse OpenAI response as JSON")
+                else:
+                    print("Failed to extract JSON part from response")
+                    raise ValueError("Failed to extract JSON from OpenAI response")
+            
+            return content_plan
         
-        return content_plan
-    
-    except aiohttp.ClientError as e:
-        print(f"Network error when calling OpenAI API: {str(e)}")
-        raise ValueError(f"Network error when calling OpenAI API: {str(e)}")
-    except json.JSONDecodeError as e:
-        print(f"Error parsing OpenAI response: {str(e)}")
-        raise ValueError(f"Error parsing OpenAI response: {str(e)}")
-    except Exception as e:
-        print(f"Error generating content plan: {str(e)}")
-        raise ValueError(f"Error generating content plan: {str(e)}")
+        except aiohttp.ClientError as e:
+            print(f"Network error when calling OpenAI API: {str(e)}")
+            raise ValueError(f"Network error when calling OpenAI API: {str(e)}")
+        except json.JSONDecodeError as e:
+            print(f"Error parsing OpenAI response: {str(e)}")
+            raise ValueError(f"Error parsing OpenAI response: {str(e)}")
+        except Exception as e:
+            print(f"Error generating content plan: {str(e)}")
+            raise ValueError(f"Error generating content plan: {str(e)}")

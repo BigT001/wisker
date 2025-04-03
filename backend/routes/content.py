@@ -22,13 +22,14 @@ class ContentPlanRequest(BaseModel):
     target_audience: Optional[str] = Field(default=None)
     additional_characters: Optional[str] = Field(default=None)
     api_key: Optional[str] = Field(default=None)
+    api_provider: str = Field(default="openai")  # Add this field
     use_gpt4: bool = Field(default=False)
 
 @router.post("/generate-plan")
 async def create_content_plan(request: ContentPlanRequest):
     """Generate a content plan for the Mischievous Cat Shopper series"""
     try:
-        print(f"Received content plan request for '{request.series_title}'")
+        print(f"Received content plan request for '{request.series_title}' using {request.api_provider}")
         
         # Create config from request
         config = {
@@ -41,7 +42,8 @@ async def create_content_plan(request: ContentPlanRequest):
             "target_audience": request.target_audience,
             "additional_characters": request.additional_characters,
             "use_gpt4": request.use_gpt4,
-            "api_key": request.api_key
+            "api_key": request.api_key,
+            "api_provider": request.api_provider  # Pass the provider to the agent
         }
         
         # Generate content plan
