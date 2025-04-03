@@ -52,6 +52,11 @@ def create_init_files():
     os.makedirs("routes", exist_ok=True)
     with open("routes/__init__.py", "w") as f:
         f.write("# Routes package\n")
+    
+    # Create __init__.py in agents directory
+    os.makedirs("agents", exist_ok=True)
+    with open("agents/__init__.py", "w") as f:
+        f.write("# Agents package\n")
 
 if __name__ == "__main__":
     # Create necessary init files

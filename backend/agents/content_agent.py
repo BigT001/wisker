@@ -1,299 +1,145 @@
-import asyncio
 import os
-from typing import Dict, Any, List
 import json
-import httpx
-
-# OpenAI API configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
-
-
-async def call_openai_api(prompt: str,
-                          system_message: str = "",
-                          model: str = "gpt-3.5-turbo") -> str:
-    """Call OpenAI API with the given prompt"""
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY environment variable is not set")
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
-    }
-
-    messages = []
-    if system_message:
-        messages.append({"role": "system", "content": system_message})
-
-    messages.append({"role": "user", "content": prompt})
-
-    data = {
-        "model": model,
-        "messages": messages,
-        "temperature": 0.7,
-        "max_tokens": 2000
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(OPENAI_API_URL,
-                                     headers=headers,
-                                     json=data,
-                                     timeout=60.0)
-        response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
-
+import aiohttp
+from typing import Dict, Any, List
 
 async def generate_content_ideas(config: Dict[str, Any]) -> Dict[str, Any]:
-    """Generate content ideas for the series using OpenAI"""
-    print(
-        "🧠 Content Planning Agent: Generating series concept and episode ideas with OpenAI..."
-    )
-
-    # Create prompt for OpenAI
-    system_message = """You are a creative content planner for a series about a mischievous cat who goes shopping.
-    Your task is to generate a detailed content plan with episode ideas.
-    Provide your response in valid JSON format."""
-
-    prompt = f"""Create a content plan for a series titled "{config['series_title']}" with {config['episodes']} episodes.
-    The main character is a cat named {config['cat_name']}.
-    The content style should be {config['content_style']}.
-
-    For each episode, include:
-    - title
-    - premise
-    - setting
-    - items the cat wants to buy
-    - conflict
-    - resolution
-
-    Also include:
-    - series_concept: A brief description of the overall series concept
-    - cat_personality: Details about the cat's traits, quirks, and catchphrases
-
-    Return a JSON object with the following structure:
-    {{
-      "series_concept": "<brief description>",
-      "cat_personality": {{
-        "traits": ["<trait1>", "<trait2>"],
-        "quirks": ["<quirk1>", "<quirk2>"],
-        "catchphrases": ["<phrase1>", "<phrase2>"]
-      }},
-      "episodes": [
+    """Generate content ideas for a cat shopping series"""
+    try:
+        # Get API key from config or environment
+        api_key = config.get('api_key') or os.environ.get('OPENAI_API_KEY')
+        
+        if not api_key:
+            raise ValueError("OpenAI API key is required but not provided")
+        
+        # Extract configuration
+        series_title = config.get('series_title', 'Mischievous Cat Shopper')
+        num_episodes = config.get('num_episodes', 5)
+        cat_name = config.get('cat_name', 'Whiskers')
+        content_style = config.get('content_style', 'humorous, family-friendly')
+        theme = config.get('theme', content_style)
+        setting = config.get('setting', '')
+        target_audience = config.get('target_audience', '')
+        additional_characters = config.get('additional_characters', '')
+        
+        print(f"Generating content ideas for '{series_title}' with {num_episodes} episodes")
+        
+        # Prepare the prompt for OpenAI
+        system_prompt = """You are a creative content planner for short-form video series. 
+        Create a detailed content plan for a series about a mischievous cat who goes shopping."""
+        
+        user_prompt = f"""Create a content plan for a short-form video series titled "{series_title}" with {num_episodes} episodes.
+        
+        The main character is a cat named {cat_name} who loves to go shopping.
+        
+        The content style should be: {content_style}
+        
+        Additional details:
+        - Setting: {setting}
+        - Target audience: {target_audience}
+        - Additional characters: {additional_characters}
+        - Theme/mood: {theme}
+        
+        For each episode, include:
+        1. A catchy title
+        2. A brief premise
+        3. The specific setting (what store or shopping location)
+        4. List of 2-3 items the cat is shopping for
+        5. A conflict that arises
+        6. How the conflict is resolved
+        
+        Also include a section about the cat's personality with:
+        1. 3-5 personality traits
+        2. 2-3 quirky behaviors
+        3. 2-3 catchphrases or sounds the cat makes
+        
+        Format the response as a JSON object with the following structure:
         {{
-          "title": "<episode title>",
-          "premise": "<brief premise>",
-          "setting": "<location>",
-          "items": ["<item1>", "<item2>"],
-          "conflict": "<main conflict>",
-          "resolution": "<resolution>"
+          "series_concept": "Brief overall concept",
+          "cat_personality": {{
+            "traits": ["trait1", "trait2", "etc"],
+            "quirks": ["quirk1", "quirk2", "etc"],
+            "catchphrases": ["phrase1", "phrase2", "etc"]
+          }},
+          "episodes": [
+            {{
+              "title": "Episode title",
+              "premise": "Brief premise",
+              "setting": "Specific store or location",
+              "items": ["item1", "item2", "etc"],
+              "conflict": "Description of conflict",
+              "resolution": "How conflict is resolved"
+            }}
+          ]
         }}
-      ]
-    }}"""
-
-    try:
-        # Call OpenAI API
-        response_text = await call_openai_api(prompt, system_message)
-
-        # Parse JSON response
-        content_plan = json.loads(response_text)
-        return content_plan
-    except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
-        # Fall back to simulated response if API call fails
-        return await generate_simulated_content_ideas(config)
-
-
-async def generate_script(episode_idea: Dict[str, Any]) -> str:
-    """Generate a script for an episode using OpenAI"""
-    print(
-        "✍️ Script Generation Agent: Creating script based on episode idea with OpenAI..."
-    )
-
-    # Create prompt for OpenAI
-    system_message = """You are a professional script writer for short-form video content.
-    Your task is to write a 60-second script for an episode about a mischievous cat who goes shopping.
-    Include scene descriptions, narration, and sound effect notes."""
-
-    prompt = f"""Write a 60-second script for an episode titled "{episode_idea['title']}".
-
-    Episode premise: {episode_idea['premise']}
-    Setting: {episode_idea['setting']}
-    Items the cat wants: {', '.join(episode_idea['items'])}
-    Conflict: {episode_idea['conflict']}
-    Resolution: {episode_idea['resolution']}
-
-    Format the script with:
-    - Scene headings with timestamps (e.g., [SCENE 1 - LOCATION - 0:00-0:05])
-    - Scene descriptions
-    - Narration lines
-    - Sound effect notes [SFX: description]
-    - Total runtime of 60 seconds
-
-    Make it humorous, family-friendly, and engaging for all ages."""
-
-    try:
-        # Call OpenAI API
-        script = await call_openai_api(prompt, system_message)
-        return script
-    except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
-        # Fall back to simulated response if API call fails
-        return await generate_simulated_script(episode_idea)
-
-
-# Fallback functions in case API calls fail
-async def generate_simulated_content_ideas(
-        config: Dict[str, Any]) -> Dict[str, Any]:
-    """Generate simulated content ideas (fallback function)"""
-    print("⚠️ Falling back to simulated content ideas...")
-    await asyncio.sleep(1)
-
-    # Return simulated content plan (same as before)
-    return {
-        "series_concept":
-        "A mischievous cat named Whiskers who goes shopping and causes chaos in various stores while trying to find the perfect items.",
-        "cat_personality": {
-            "traits":
-            ["curious", "playful", "determined", "easily distracted"],
-            "quirks": [
-                "knocks items off shelves", "hides in shopping bags",
-                "meows at cashiers"
+        
+        Ensure all content is family-friendly and appropriate for all audiences."""
+        
+        # Prepare the API request
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
-            "catchphrases": [
-                "Purr-fect purchase!", "Meow-velous deal!",
-                "Cat-astrophe in aisle 9!"
-            ]
-        },
-        "episodes": [
-            {
-                "title":
-                "Grocery Store Mayhem",
-                "premise":
-                "Whiskers sneaks into a grocery store to find the fanciest cat food.",
-                "setting":
-                "Busy supermarket on a Saturday morning",
-                "items": ["premium cat food", "catnip", "tuna"],
-                "conflict":
-                "Store manager notices a cat in the store and tries to catch Whiskers",
-                "resolution":
-                "Whiskers charms an elderly shopper who helps him escape with his treats"
-            },
-            {
-                "title":
-                "Pet Store Pandemonium",
-                "premise":
-                "Whiskers visits a pet store to find a new toy but gets distracted by all the options.",
-                "setting":
-                "Large pet supply store with many aisles",
-                "items": ["interactive toy", "cat bed", "treats"],
-                "conflict":
-                "Whiskers accidentally releases some hamsters from their cages",
-                "resolution":
-                "Whiskers helps round up the hamsters and is rewarded with the toy he wanted"
-            },
-            {
-                "title":
-                "Department Store Disaster",
-                "premise":
-                "Whiskers follows his owner to a fancy department store and gets separated.",
-                "setting":
-                "Upscale department store with multiple floors",
-                "items": ["bow tie", "fancy cat collar", "gourmet treats"],
-                "conflict":
-                "Security guards spot Whiskers and chase him through the store",
-                "resolution":
-                "Whiskers finds his way to the lost and found where his owner is looking for him"
-            },
-            {
-                "title":
-                "Farmers Market Adventure",
-                "premise":
-                "Whiskers explores an outdoor farmers market looking for fresh fish.",
-                "setting":
-                "Bustling outdoor farmers market on a sunny day",
-                "items": ["fresh fish", "organic catnip", "cream"],
-                "conflict":
-                "A dog at the market starts chasing Whiskers between the stalls",
-                "resolution":
-                "Whiskers befriends a fishmonger who gives him scraps and shoos away the dog"
-            },
-            {
-                "title":
-                "Online Shopping Chaos",
-                "premise":
-                "Whiskers walks across his owner's keyboard and accidentally orders items online.",
-                "setting":
-                "Home office with computer and later delivery trucks arriving",
-                "items": ["cat tower", "100 cans of tuna", "cat costume"],
-                "conflict":
-                "Packages keep arriving and Whiskers' owner is confused and frustrated",
-                "resolution":
-                "The owner discovers Whiskers' online shopping spree when the cat happily plays in the empty boxes"
-            }
-        ]
-    }
-
-
-async def generate_simulated_script(episode_idea: Dict[str, Any]) -> str:
-    """Generate a simulated script (fallback function)"""
-    print("⚠️ Falling back to simulated script...")
-    await asyncio.sleep(1)
-
-    # Return simulated script (same as before)
-    return f"""TITLE: {episode_idea['title'].upper()}
-
-[SCENE 1 - EXTERIOR {episode_idea['setting'].upper()} - DAY - 0:00-0:05]
-{episode_idea['setting']} with appropriate signage visible.
-
-NARRATION: Meet Whiskers, a cat with expensive taste and a shopping list.
-
-[SFX: Playful, mischievous music begins]
-
-[SCENE 2 - STORE ENTRANCE - 0:05-0:10]
-Whiskers sneakily enters the {episode_idea['setting'].lower()}.
-
-NARRATION: Today's mission: find {episode_idea['items'][0]} and maybe cause a little chaos along the way.
-
-[SFX: Door whoosh, bell chime]
-
-[SCENE 3 - SHOPPING AREA - 0:10-0:20]
-Whiskers explores the store, examining various items with a discerning eye.
-
-NARRATION: Not just any {episode_idea['items'][0]} would do. Whiskers was looking for the premium stuff.
-
-[SFX: Contemplative "hmm" sound as Whiskers inspects products]
-
-[SCENE 4 - CONFLICT INTRODUCTION - 0:20-0:25]
-{episode_idea['conflict']}
-
-NARRATION: But not everyone appreciated a feline shopper with refined taste.
-
-[SFX: Dramatic music sting]
-
-[SCENE 5 - CHASE/CONFLICT SCENE - 0:25-0:40]
-Montage of Whiskers navigating the conflict, causing minor chaos.
-
-NARRATION: What followed was pure cat-astrophe!
-
-[SFX: Fast-paced chase music, appropriate sound effects]
-
-[SCENE 6 - RESOLUTION SETUP - 0:40-0:50]
-{episode_idea['resolution']}
-
-NARRATION: Sometimes the perfect shopping partner is the one who appreciates the finer things in life.
-
-[SFX: Gentle, resolving music]
-
-[SCENE 7 - CONCLUSION - 0:50-0:60]
-Whiskers with the items he wanted, looking satisfied.
-
-NARRATION: Mission accomplished! Another successful shopping adventure for our mischievous cat shopper.
-
-[SFX: Triumphant music, shopping bag rustling, purring]
-
-WHISKERS: (looking at camera) Purr-fect purchase!
-
-[END SCENE - FADE OUT]
-
-[TOTAL RUNTIME: 60 SECONDS]"""
+            "temperature": 0.7
+        }
+        
+        print("Sending request to OpenAI API")
+        
+        # Make the API request
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=payload
+            ) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    print(f"OpenAI API error: {response.status} - {error_text}")
+                    raise ValueError(f"OpenAI API returned error {response.status}: {error_text}")
+                
+                result = await response.json()
+        
+        print("Received response from OpenAI API")
+        
+        # Extract and parse the content plan
+        content_plan_text = result["choices"][0]["message"]["content"]
+        
+        # Sometimes OpenAI returns text before or after the JSON, so we need to extract just the JSON part
+        try:
+            # Try to parse the entire response as JSON
+            content_plan = json.loads(content_plan_text)
+            print("Successfully parsed JSON response")
+        except json.JSONDecodeError:
+            # If that fails, try to extract just the JSON part
+            import re
+            print("Failed to parse entire response as JSON, trying to extract JSON part")
+            json_match = re.search(r'({[\s\S]*})', content_plan_text)
+            if json_match:
+                try:
+                    content_plan = json.loads(json_match.group(1))
+                    print("Successfully extracted and parsed JSON part")
+                except json.JSONDecodeError:
+                    print("Failed to parse extracted JSON part")
+                    raise ValueError("Failed to parse OpenAI response as JSON")
+            else:
+                print("Failed to extract JSON part from response")
+                raise ValueError("Failed to extract JSON from OpenAI response")
+        
+        return content_plan
+    
+    except aiohttp.ClientError as e:
+        print(f"Network error when calling OpenAI API: {str(e)}")
+        raise ValueError(f"Network error when calling OpenAI API: {str(e)}")
+    except json.JSONDecodeError as e:
+        print(f"Error parsing OpenAI response: {str(e)}")
+        raise ValueError(f"Error parsing OpenAI response: {str(e)}")
+    except Exception as e:
+        print(f"Error generating content plan: {str(e)}")
+        raise ValueError(f"Error generating content plan: {str(e)}")

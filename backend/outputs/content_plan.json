@@ -10,12 +10,12 @@
     "quirks": [
       "knocks items off shelves",
       "hides in shopping bags",
-      "meows at cashiers"
+      "meows at cashiers with a distinct 'Whiskers' sound"
     ],
     "catchphrases": [
       "Purr-fect purchase!",
       "Meow-velous deal!",
-      "Cat-astrophe in aisle 9!"
+      "Whiskers's cat-astrophe in aisle 9!"
     ]
   },
   "episodes": [
@@ -28,8 +28,8 @@
         "catnip",
         "tuna"
       ],
-      "conflict": "Store manager notices a cat in the store and tries to catch Whiskers",
-      "resolution": "Whiskers charms an elderly shopper who helps him escape with his treats"
+      "conflict": "Store manager notices Whiskers in the store and tries to catch them",
+      "resolution": "Whiskers charms an elderly shopper who helps them escape with their treats"
     },
     {
       "title": "Pet Store Pandemonium",
@@ -41,19 +41,19 @@
         "treats"
       ],
       "conflict": "Whiskers accidentally releases some hamsters from their cages",
-      "resolution": "Whiskers helps round up the hamsters and is rewarded with the toy he wanted"
+      "resolution": "Whiskers helps round up the hamsters and is rewarded with the toy they wanted"
     },
     {
       "title": "Department Store Disaster",
-      "premise": "Whiskers follows his owner to a fancy department store and gets separated.",
+      "premise": "Whiskers follows their owner to a fancy department store and gets separated.",
       "setting": "Upscale department store with multiple floors",
       "items": [
         "bow tie",
         "fancy cat collar",
         "gourmet treats"
       ],
-      "conflict": "Security guards spot Whiskers and chase him through the store",
-      "resolution": "Whiskers finds his way to the lost and found where his owner is looking for him"
+      "conflict": "Security guards spot Whiskers and chase them through the store",
+      "resolution": "Whiskers finds their way to the lost and found where their owner is looking for them"
     },
     {
       "title": "Farmers Market Adventure",
@@ -65,19 +65,19 @@
         "cream"
       ],
       "conflict": "A dog at the market starts chasing Whiskers between the stalls",
-      "resolution": "Whiskers befriends a fishmonger who gives him scraps and shoos away the dog"
+      "resolution": "Whiskers befriends a fishmonger who gives them scraps and shoos away the dog"
     },
     {
       "title": "Online Shopping Chaos",
-      "premise": "Whiskers walks across his owner's keyboard and accidentally orders items online.",
+      "premise": "Whiskers walks across their owner's keyboard and accidentally orders items online.",
       "setting": "Home office with computer and later delivery trucks arriving",
       "items": [
         "cat tower",
         "100 cans of tuna",
         "cat costume"
       ],
-      "conflict": "Packages keep arriving and Whiskers' owner is confused and frustrated",
-      "resolution": "The owner discovers Whiskers' online shopping spree when the cat happily plays in the empty boxes"
+      "conflict": "Packages keep arriving and Whiskers's owner is confused and frustrated",
+      "resolution": "The owner discovers Whiskers's online shopping spree when the cat happily plays in the empty boxes"
     }
   ]
 }

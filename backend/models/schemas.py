@@ -4,8 +4,15 @@ from typing import List, Dict, Any, Optional
 class ContentConfig(BaseModel):
     series_title: str = "Mischievous Cat Shopper"
     episodes: int = 5
+    num_episodes: Optional[int] = None  # Added for compatibility
     cat_name: str = "Whiskers"
-    content_style: str = "humorous, family-friendly, 30-60 seconds per episode"
+    content_style: str = "humorous, family-friendly tricky, 30-60 seconds per episode"
+    theme: Optional[str] = None
+    setting: Optional[str] = None
+    target_audience: Optional[str] = None
+    additional_characters: Optional[str] = None
+    api_key: Optional[str] = None
+    use_gpt4: Optional[bool] = False
 
 class EpisodeIdea(BaseModel):
     title: str

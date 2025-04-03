@@ -1,65 +1,94 @@
 // API utilities for communicating with the Python backend
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Helper function for API requests
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || 'An error occurred while fetching the data.');
+  console.log(`Making request to: ${url}`);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || `HTTP error ${response.status}`;
+      throw new Error(errorMessage);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error in API request to ${endpoint}:`, error);
+    throw error instanceof Error 
+      ? error 
+      : new Error('An unknown error occurred while fetching the data.');
   }
-
-  return response.json();
 }
 
 // Script generation
-export async function generateScript(episodeIndex: number) {
-  return fetchAPI(`/generate/script/${episodeIndex}`, {
+export async function generateScript(episodeIndex: number, apiKey?: string) {
+  return fetchAPI(`/content/generate-script`, {
     method: 'POST',
+    body: JSON.stringify({ 
+      episode_index: episodeIndex,
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
 // Visual prompts generation
-export async function generateVisualPrompts(episodeIndex: number) {
+export async function generateVisualPrompts(episodeIndex: number, apiKey?: string) {
   return fetchAPI(`/generate/visual-prompts/${episodeIndex}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
 // Image generation
-export async function generateImages(episodeIndex: number) {
+export async function generateImages(episodeIndex: number, apiKey?: string) {
   return fetchAPI(`/generate/images/${episodeIndex}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
 // Voiceover generation
-export async function generateVoiceovers(episodeIndex: number) {
+export async function generateVoiceovers(episodeIndex: number, apiKey?: string) {
   return fetchAPI(`/generate/voiceovers/${episodeIndex}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
 // Video generation
-export async function generateVideo(episodeIndex: number) {
+export async function generateVideo(episodeIndex: number, apiKey?: string) {
   return fetchAPI(`/generate/video/${episodeIndex}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
 // Social media plan generation
-export async function generateSocialMediaPlan(episodeIndex: number) {
+export async function generateSocialMediaPlan(episodeIndex: number, apiKey?: string) {
   return fetchAPI(`/generate/social-media/${episodeIndex}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
@@ -69,28 +98,53 @@ export async function getJobStatus(jobId: string) {
 }
 
 interface ContentPlanConfig {
+  series_title?: string;
   num_episodes: number;
+  cat_name?: string;
+  content_style?: string;
   theme: string;
-  title?: string;
+  setting?: string;
+  target_audience?: string;
+  additional_characters?: string;
   description?: string;
+  api_key?: string;
 }
 
 /**
  * Generates a content plan based on the provided configuration
  */
 export async function generateContentPlan(config: ContentPlanConfig) {
-  return fetchAPI('/generate/content-plan', {
+  console.log("Sending content plan request with config:", {
+    ...config,
+    api_key: config.api_key ? "[REDACTED]" : undefined
+  });
+  
+  // Use the provided API key or get from localStorage
+  const apiKey = config.api_key || localStorage.getItem('openai_api_key') || undefined;
+  
+  // If a new API key is provided, save it for future use
+  if (config.api_key) {
+    localStorage.setItem('openai_api_key', config.api_key);
+  }
+  
+  return fetchAPI('/content/generate-plan', {
     method: 'POST',
-    body: JSON.stringify(config),
+    body: JSON.stringify({
+      ...config,
+      api_key: apiKey
+    }),
   });
 }
 
 /**
  * Runs the full content generation pipeline for a specific episode
  */
-export async function runFullPipeline(episodeId: number) {
-  return fetchAPI(`/generate/pipeline/${episodeId}`, {
+export async function runFullPipeline(episodeId: number, apiKey?: string) {
+  return fetchAPI(`/generate/full-pipeline/${episodeId}`, {
     method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey || localStorage.getItem('openai_api_key') || undefined
+    }),
   });
 }
 
@@ -99,12 +153,15 @@ export async function runFullPipeline(episodeId: number) {
  */
 export async function checkApiStatus(): Promise<boolean> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetchAPI('/status', {
       method: 'GET',
-      // Add a timeout to prevent hanging requests
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
     });
     
+    clearTimeout(timeoutId);
     return response.status === 'operational';
   } catch (error) {
     console.error('API status check failed:', error);
