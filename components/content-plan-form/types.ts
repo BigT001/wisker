@@ -15,4 +15,5 @@ export interface ContentPlanFormData {
 
 export interface ContentPlanFormProps {
   apiConnected: boolean | null;
+  onPlanCreated?: (plan: any) => void;
 }

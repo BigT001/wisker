@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
-import { generateContentPlan, runFullPipeline, checkApiStatus } from "@/lib/api"
+import { generateContentPlan,  checkApiStatus } from "@/lib/api"
 
 interface QuickActionsProps {
   apiConnected: boolean | null
@@ -78,44 +78,44 @@ export default function QuickActions({
     }
   }
 
-  const handleRunFullPipeline = async () => {
-    if (!apiConnected) {
-      toast({
-        title: "API not connected",
-        description: "Please check your API connection and try again.",
-        variant: "destructive",
-      })
-      return
-    }
+  // const handleRunFullPipeline = async () => {
+  //   if (!apiConnected) {
+  //     toast({
+  //       title: "API not connected",
+  //       description: "Please check your API connection and try again.",
+  //       variant: "destructive",
+  //     })
+  //     return
+  //   }
 
-    setIsRunningPipeline(true)
-    toast({
-      title: "Starting full pipeline",
-      description: "This will generate all content for episode 0",
-    })
+  //   setIsRunningPipeline(true)
+  //   toast({
+  //     title: "Starting full pipeline",
+  //     description: "This will generate all content for episode 0",
+  //   })
 
-    try {
-      await runFullPipeline(0)
+  //   try {
+  //     await runFullPipeline(0)
      
-      toast({
-        title: "Pipeline started!",
-        description: "Check the Status Monitor for progress",
-        variant: "success",
-      })
+  //     toast({
+  //       title: "Pipeline started!",
+  //       description: "Check the Status Monitor for progress",
+  //       variant: "success",
+  //     })
      
-      // Switch to status tab
-      setActiveTab("status")
-    } catch (error) {
-      console.error("Pipeline execution failed:", error);
-      toast({
-        title: "Error",
-        description: "Failed to start pipeline. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsRunningPipeline(false)
-    }
-  }
+  //     // Switch to status tab
+  //     setActiveTab("status")
+  //   } catch (error) {
+  //     console.error("Pipeline execution failed:", error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to start pipeline. Please try again.",
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsRunningPipeline(false)
+  //   }
+  // }
 
   const refreshApiStatus = async () => {
     setIsRefreshingStatus(true);
@@ -226,7 +226,7 @@ export default function QuickActions({
                   <Button
                     variant="outline"
                     className="relative overflow-hidden"
-                    onClick={handleRunFullPipeline}
+                    // onClick={handleRunFullPipeline}
                     disabled={isRunningPipeline || !apiConnected}
                   >
                     {isRunningPipeline && (

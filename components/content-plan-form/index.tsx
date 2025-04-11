@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { generateContentPlan } from "@/lib/api";
-
 import { FormHeader } from "./formHeader";
 import { FormFields } from "./formFields";
 import { ApiProviderSection } from "./apiProviderSection";
@@ -13,6 +12,7 @@ import { ContentPlanFormData, ContentPlanFormProps, ApiProvider } from "./types"
 
 export default function ContentPlanForm({
   apiConnected,
+  onPlanCreated
 }: ContentPlanFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [contentPlan, setContentPlan] = useState<any>(null);
@@ -37,7 +37,6 @@ export default function ContentPlanForm({
     const savedApiKey = localStorage.getItem(
       savedProvider === "openai" ? "openai_api_key" : "huggingface_api_key"
     );
-
     if (savedProvider) {
       setFormData((prev) => ({
         ...prev,
@@ -55,7 +54,7 @@ export default function ContentPlanForm({
     if (name === 'api_provider') {
       setFormData((prev) => ({
         ...prev,
-        api_provider: (value === 'huggingface' || value === 'openai') 
+        api_provider: (value === 'huggingface' || value === 'openai')
           ? value as ApiProvider
           : prev.api_provider,
         api_key: '', // Clear the API key when switching providers
@@ -72,7 +71,6 @@ export default function ContentPlanForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!apiConnected) {
       toast({
         title: "API not connected",
@@ -81,43 +79,36 @@ export default function ContentPlanForm({
       });
       return;
     }
-
     setIsLoading(true);
-
     try {
       toast({
         title: "Generating content plan",
         description: "This may take a few moments...",
       });
-
       const apiKey =
-        formData.api_key || 
-        (formData.api_provider === 'openai' 
-          ? localStorage.getItem("openai_api_key") 
-          : localStorage.getItem("huggingface_api_key")) || 
+        formData.api_key ||
+        (formData.api_provider === 'openai'
+          ? localStorage.getItem("openai_api_key")
+          : localStorage.getItem("huggingface_api_key")) ||
         undefined;
-
       if (!apiKey) {
         throw new Error(
           `${formData.api_provider === 'openai' ? 'OpenAI' : 'Hugging Face'} API key is required.`
         );
       }
-
       if (formData.api_provider === 'openai' && !apiKey.startsWith('sk-')) {
         throw new Error(
           "Invalid OpenAI API key format. API keys should start with 'sk-'"
         );
       }
-
       if (formData.api_key) {
         localStorage.setItem(
-          formData.api_provider === 'openai' 
-            ? "openai_api_key" 
-            : "huggingface_api_key", 
+          formData.api_provider === 'openai'
+            ? "openai_api_key"
+            : "huggingface_api_key",
           formData.api_key
         );
       }
-
       const config = {
         series_title: formData.series_title,
         num_episodes: formData.episodes,
@@ -132,7 +123,32 @@ export default function ContentPlanForm({
       };
 
       const data = await generateContentPlan(config);
-      setContentPlan(data);
+      
+      // Save the plan to localStorage with a unique ID
+      const planId = `content-plan-${Date.now()}`;
+      const planToSave = {
+        ...data,
+        id: planId,
+        created_at: new Date().toISOString(),
+        config: {
+          series_title: formData.series_title,
+          num_episodes: formData.episodes,
+          cat_name: formData.cat_name,
+          content_style: formData.content_style,
+          setting: formData.setting,
+          target_audience: formData.target_audience,
+          additional_characters: formData.additional_characters,
+        }
+      };
+      
+      localStorage.setItem(planId, JSON.stringify(planToSave));
+      
+      setContentPlan(planToSave);
+      
+      // Call the callback if provided
+      if (onPlanCreated) {
+        onPlanCreated(planToSave);
+      }
 
       toast({
         title: "Success!",
@@ -141,9 +157,7 @@ export default function ContentPlanForm({
       });
     } catch (error) {
       console.error("Error generating content plan:", error);
-
       let errorMessage = "Failed to generate content plan. Please try again.";
-
       if (error instanceof Error) {
         if (
           error.message.includes("invalid_api_key") ||
@@ -158,7 +172,6 @@ export default function ContentPlanForm({
           errorMessage = error.message;
         }
       }
-
       toast({
         title: "Error",
         description: errorMessage,
@@ -177,11 +190,11 @@ export default function ContentPlanForm({
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <FormFields 
+            <FormFields
               formData={formData}
               handleChange={handleChange}
             />
-            <ApiProviderSection 
+            <ApiProviderSection
               apiProvider={formData.api_provider}
               apiKey={formData.api_key}
               onProviderChange={(provider) => {
@@ -200,18 +213,19 @@ export default function ContentPlanForm({
             />
           </CardContent>
           <CardFooter className="flex justify-end">
-            <SubmitButton 
-              isLoading={isLoading} 
-              apiConnected={apiConnected} 
+            <SubmitButton
+              isLoading={isLoading}
+              apiConnected={apiConnected}
             />
           </CardFooter>
         </form>
       </Card>
       {contentPlan && (
-        <ContentPlanResult 
-          contentPlan={contentPlan} 
+        <ContentPlanResult
+          contentPlan={contentPlan}
         />
       )}
     </div>
   );
 }
+

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 
-from agents.content_agent import generate_content_plan, generate_episode_script
+from backend.agents.content_plan_agent.content_agent import generate_content_plan, generate_episode_script
 
 app = FastAPI(
     title="Content Generation API",

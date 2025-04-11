@@ -2,6 +2,8 @@ import os
 
 # Create output directories
 os.makedirs("./outputs", exist_ok=True)
+os.makedirs("./outputs/content_plan", exist_ok=True)
+os.makedirs("./outputs/scripts", exist_ok=True)
 os.makedirs("./outputs/images", exist_ok=True)
 os.makedirs("./outputs/audio", exist_ok=True)
 os.makedirs("./outputs/video", exist_ok=True)

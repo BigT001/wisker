@@ -2,6 +2,12 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+from backend.routes import scripts
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Import configuration
 from config import (
@@ -10,7 +16,7 @@ from config import (
 )
 
 # Import routers
-from routes import content, images, voiceovers, videos, social_media, jobs, pipeline, files
+from routes import content, scripts
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -30,17 +36,17 @@ app.add_middleware(
 
 # Include routers
 app.include_router(content.router)
-app.include_router(images.router)
-app.include_router(voiceovers.router)
-app.include_router(videos.router)
-app.include_router(social_media.router)
-app.include_router(jobs.router)
-app.include_router(pipeline.router)
-app.include_router(files.router)
+app.include_router(scripts.router)
+
+logger.info("All routers have been included")
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Mischievous Cat Shopper API"}
+
+@app.get("/status")
+async def status():
+    return {"status": "ok"}
 
 # Create an __init__.py file in the routes directory
 def create_init_files():
@@ -54,4 +60,5 @@ if __name__ == "__main__":
     
     # Use port 8000 for local development
     port = int(os.environ.get("PORT", 8000))
+    logger.info(f"Starting server on port {port}")
     uvicorn.run("api.main:app", host="0.0.0.0", port=port, reload=True)
